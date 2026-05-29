@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Birthday Invitation – Pratyoosh</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --crimson:   #c0122c;
+      --crimson-l: #e82244;
+      --gold:      #d4a84b;
+      --gold-l:    #f0cc7a;
+      --onyx:      #0a0608;
+      --surface:   #110b0d;
+      --surface2:  #1c1115;
+      --text:      #f5e9e0;
+      --muted:     #9e8070;
+    }
+
+    html, body {
+      min-height: 100%;
+      background: var(--onyx);
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* ── SCENE ── */
+    .scene {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px;
+      position: relative;
+    }
+
+    /* Radial glow behind card */
+    .scene::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 50% 50%, rgba(192,18,44,.18) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 30% at 80% 20%, rgba(212,168,75,.07) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    /* ── CONFETTI CANVAS ── */
+    #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+
+    /* ── CARD ── */
+    .card {
+      position: relative;
+      z-index: 1;
+      max-width: 440px;
+      width: 100%;
+      background: var(--surface);
+      border-radius: 28px;
+      overflow: hidden;
+      animation: fadeUp .9s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    /* Animated glow border via pseudo + conic-gradient */
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 30px;
+      background: conic-gradient(from var(--a, 0deg),
+        var(--crimson), var(--gold), var(--crimson-l), var(--gold-l), var(--crimson));
+      z-index: -1;
+      animation: spinBorder 4s linear infinite;
+    }
+    @property --a { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+    @keyframes spinBorder { to { --a: 360deg; } }
+
+    /* inner wrapper to re-clip */
+    .card-inner {
+      background: var(--surface);
+      border-radius: 26px;
+      overflow: hidden;
+    }
+
+    /* ── HEADER BAND ── */
+    .header {
+      background: linear-gradient(135deg, #1a0a0e 0%, #2a080f 60%, #1a0a0e 100%);
+      padding: 48px 36px 36px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+
+    /* flame-like shimmer behind header text */
+    .header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 70% 60% at 50% 80%, rgba(192,18,44,.22) 0%, transparent 70%);
+    }
+
+    .tag {
+      display: inline-block;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: .25em;
+      text-transform: uppercase;
+      color: var(--gold);
+      border: 1px solid rgba(212,168,75,.35);
+      border-radius: 100px;
+      padding: 5px 16px;
+      margin-bottom: 24px;
+      animation: fadeUp .9s .15s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    .emoji-row {
+      font-size: 2rem;
+      line-height: 1;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      animation: fadeUp .9s .2s cubic-bezier(.22,1,.36,1) both;
+    }
+    .emoji-row span { display: inline-block; animation: float 3s ease-in-out infinite; }
+    .emoji-row span:nth-child(2) { animation-delay: -.6s; }
+    .emoji-row span:nth-child(3) { animation-delay: -1.2s; }
+
+    h1.invite-title {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      font-size: clamp(11px, 3vw, 13px);
+      letter-spacing: .3em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+      animation: fadeUp .9s .25s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    h2.name {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      font-size: clamp(52px, 14vw, 78px);
+      line-height: .95;
+      letter-spacing: -.01em;
+      color: var(--text);
+      position: relative;
+      display: inline-block;
+      animation: fadeUp .9s .3s cubic-bezier(.22,1,.36,1) both;
+    }
+    h2.name::after {
+      content: attr(data-text);
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--gold-l), var(--crimson-l), var(--gold));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      opacity: 0;
+      animation: shimmerName 4s 1.5s ease-in-out infinite;
+    }
+    @keyframes shimmerName {
+      0%,100% { opacity: 0; }
+      50%      { opacity: 1; }
+    }
+
+    .subtitle {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: clamp(15px, 4vw, 18px);
+      color: rgba(245,233,224,.55);
+      margin-top: 14px;
+      animation: fadeUp .9s .38s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 36px;
+      margin: 28px 0 24px;
+    }
+    .divider-line { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(212,168,75,.4)); }
+    .divider-line:last-child { background: linear-gradient(270deg, transparent, rgba(212,168,75,.4)); }
+    .divider-diamond {
+      width: 8px; height: 8px;
+      background: var(--gold);
+      transform: rotate(45deg);
+      flex-shrink: 0;
+      box-shadow: 0 0 8px var(--gold);
+    }
+
+    /* ── DETAILS GRID ── */
+    .details {
+      padding: 0 32px 12px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .detail-item {
+      background: var(--surface2);
+      border-radius: 16px;
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      border: 1px solid rgba(255,255,255,.04);
+      transition: border-color .3s, transform .3s;
+      animation: fadeUp .9s cubic-bezier(.22,1,.36,1) both;
+    }
+    .detail-item:hover {
+      border-color: rgba(212,168,75,.25);
+      transform: translateY(-2px);
+    }
+    .detail-item:nth-child(1) { animation-delay: .45s; }
+    .detail-item:nth-child(2) { animation-delay: .52s; }
+    .detail-item:nth-child(3) { animation-delay: .59s; }
+
+    .detail-icon {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .detail-icon.date  { background: rgba(192,18,44,.2); box-shadow: 0 0 20px rgba(192,18,44,.15); }
+    .detail-icon.time  { background: rgba(212,168,75,.15); box-shadow: 0 0 20px rgba(212,168,75,.1); }
+    .detail-icon.place { background: rgba(192,18,44,.2); box-shadow: 0 0 20px rgba(192,18,44,.15); }
+
+    .detail-text { display: flex; flex-direction: column; gap: 2px; }
+    .detail-label {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .detail-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(18px, 5vw, 22px);
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.2;
+    }
+    .detail-value.highlight {
+      background: linear-gradient(90deg, var(--gold-l), var(--gold));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .detail-sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 1px;
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      padding: 24px 32px 36px;
+      text-align: center;
+      animation: fadeUp .9s .7s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    .rsvp-line {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 14px;
+      color: rgba(245,233,224,.35);
+      letter-spacing: .04em;
+    }
+
+    .stamp {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 18px;
+      border: 1px solid rgba(212,168,75,.3);
+      border-radius: 100px;
+      padding: 10px 24px;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      position: relative;
+      overflow: hidden;
+    }
+    .stamp::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(212,168,75,.08), transparent);
+      transform: translateX(-100%);
+      animation: sweepShimmer 3s 2s ease-in-out infinite;
+    }
+    @keyframes sweepShimmer {
+      0%   { transform: translateX(-100%); }
+      60%  { transform: translateX(100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    /* ── KEYFRAMES ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes float {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-6px); }
+    }
+
+    /* ── MOBILE ── */
+    @media (max-width: 480px) {
+      .header { padding: 38px 24px 28px; }
+      .details { padding: 0 20px 8px; }
+      .divider { padding: 0 24px; }
+      .footer  { padding: 20px 24px 30px; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="confetti"></canvas>
+
+<div class="scene">
+  <article class="card">
+    <div class="card-inner">
+
+      <!-- HEADER -->
+      <header class="header">
+        <div class="tag">From Pratyoosh ✦</div>
+        <div class="emoji-row">
+          <span>🎉</span><span>🎂</span><span>🎊</span>
+        </div>
+        <h1 class="invite-title">It's My Birthday!</h1>
+        <h2 class="name" data-text="Come Celebrate">Come Celebrate</h2>
+        <p class="subtitle">Pratyoosh is turning up — and you're invited!</p>
+      </header>
+
+      <!-- DIVIDER -->
+      <div class="divider">
+        <div class="divider-line"></div>
+        <div class="divider-diamond"></div>
+        <div class="divider-line"></div>
+      </div>
+
+      <!-- DETAILS -->
+      <section class="details">
+
+        <div class="detail-item">
+          <div class="detail-icon date">🗓️</div>
+          <div class="detail-text">
+            <span class="detail-label">Date</span>
+            <span class="detail-value highlight">6th June</span>
+            <span class="detail-sub">Save the date!</span>
+          </div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-icon time">⏰</div>
+          <div class="detail-text">
+            <span class="detail-label">Time</span>
+            <span class="detail-value">7:15 PM</span>
+            <span class="detail-sub">Don't be late!</span>
+          </div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-icon place">📍</div>
+          <div class="detail-text">
+            <span class="detail-label">Location</span>
+            <span class="detail-value highlight">Pizza Buffet</span>
+            <span class="detail-sub">Mira Road</span>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- FOOTER -->
+      <footer class="footer">
+        <p class="rsvp-line">I can't wait to celebrate with you — see you there! 🎂</p>
+        <div class="stamp">🥂 &nbsp;Let's Party</div>
+      </footer>
+
+    </div><!-- /.card-inner -->
+  </article>
+</div>
+
+<script>
+  /* ── CONFETTI ── */
+  const canvas = document.getElementById('confetti');
+  const ctx    = canvas.getContext('2d');
+  let W, H, particles = [];
+
+  const COLORS = ['#c0122c','#e82244','#d4a84b','#f0cc7a','#f5e9e0','#8a1a2e'];
+  const SHAPES = ['circle','rect','tri'];
+  const COUNT  = 90;
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function rand(a, b) { return a + Math.random() * (b - a); }
+
+  function spawn() {
+    return {
+      x:   rand(0, W),
+      y:   rand(-H * .6, 0),
+      vx:  rand(-0.6, 0.6),
+      vy:  rand(0.4, 1.2),
+      size: rand(4, 9),
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      shape: SHAPES[Math.floor(Math.random() * SHAPES.length)],
+      rot:   rand(0, Math.PI * 2),
+      rotV:  rand(-.03, .03),
+      alpha: rand(0.5, 1),
+      alphaV: rand(-.0015, -.0005),
+    };
+  }
+
+  function draw(p) {
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rot);
+    ctx.globalAlpha = Math.max(0, p.alpha);
+    ctx.fillStyle   = p.color;
+    if (p.shape === 'circle') {
+      ctx.beginPath();
+      ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (p.shape === 'rect') {
+      ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+    } else {
+      ctx.beginPath();
+      ctx.moveTo(0, -p.size / 2);
+      ctx.lineTo(p.size / 2, p.size / 2);
+      ctx.lineTo(-p.size / 2, p.size / 2);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function update(p) {
+    p.x   += p.vx;
+    p.y   += p.vy;
+    p.rot += p.rotV;
+    p.alpha += p.alphaV;
+    // drift side gently
+    p.vx += (Math.random() - .5) * .02;
+  }
+
+  function loop() {
+    ctx.clearRect(0, 0, W, H);
+    particles = particles.filter(p => p.alpha > 0 && p.y < H + 20);
+    // replenish slowly
+    while (particles.length < COUNT) particles.push(spawn());
+    particles.forEach(p => { update(p); draw(p); });
+    requestAnimationFrame(loop);
+  }
+
+  resize();
+  for (let i = 0; i < COUNT; i++) {
+    const p = spawn();
+    p.y = rand(0, H); // pre-scatter on load
+    particles.push(p);
+  }
+  window.addEventListener('resize', resize);
+  loop();
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Birthday Invitation – Pratyoosh</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --crimson:   #c0122c;
+      --crimson-l: #e82244;
+      --gold:      #d4a84b;
+      --gold-l:    #f0cc7a;
+      --onyx:      #0a0608;
+      --surface:   #110b0d;
+      --surface2:  #1c1115;
+      --text:      #f5e9e0;
+      --muted:     #9e8070;
+    }
+
+    html, body {
+      min-height: 100%;
+      background: var(--onyx);
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* ── SCENE ── */
+    .scene {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px;
+      position: relative;
+    }
+
+    /* Radial glow behind card */
+    .scene::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 50% 50%, rgba(192,18,44,.18) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 30% at 80% 20%, rgba(212,168,75,.07) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    /* ── CONFETTI CANVAS ── */
+    #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+
+    /* ── CARD ── */
+    .card {
+      position: relative;
+      z-index: 1;
+      max-width: 440px;
+      width: 100%;
+      background: var(--surface);
+      border-radius: 28px;
+      overflow: hidden;
+      animation: fadeUp .9s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    /* Animated glow border via pseudo + conic-gradient */
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 30px;
+      background: conic-gradient(from var(--a, 0deg),
+        var(--crimson), var(--gold), var(--crimson-l), var(--gold-l), var(--crimson));
+      z-index: -1;
+      animation: spinBorder 4s linear infinite;
+    }
+    @property --a { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+    @keyframes spinBorder { to { --a: 360deg; } }
+
+    /* inner wrapper to re-clip */
+    .card-inner {
+      background: var(--surface);
+      border-radius: 26px;
+      overflow: hidden;
+    }
+
+    /* ── HEADER BAND ── */
+    .header {
+      background: linear-gradient(135deg, #1a0a0e 0%, #2a080f 60%, #1a0a0e 100%);
+      padding: 48px 36px 36px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+
+    /* flame-like shimmer behind header text */
+    .header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 70% 60% at 50% 80%, rgba(192,18,44,.22) 0%, transparent 70%);
+    }
+
+    .tag {
+      display: inline-block;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: .25em;
+      text-transform: uppercase;
+      color: var(--gold);
+      border: 1px solid rgba(212,168,75,.35);
+      border-radius: 100px;
+      padding: 5px 16px;
+      margin-bottom: 24px;
+      animation: fadeUp .9s .15s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    .emoji-row {
+      font-size: 2rem;
+      line-height: 1;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      animation: fadeUp .9s .2s cubic-bezier(.22,1,.36,1) both;
+    }
+    .emoji-row span { display: inline-block; animation: float 3s ease-in-out infinite; }
+    .emoji-row span:nth-child(2) { animation-delay: -.6s; }
+    .emoji-row span:nth-child(3) { animation-delay: -1.2s; }
+
+    h1.invite-title {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      font-size: clamp(11px, 3vw, 13px);
+      letter-spacing: .3em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+      animation: fadeUp .9s .25s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    h2.name {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      font-size: clamp(52px, 14vw, 78px);
+      line-height: .95;
+      letter-spacing: -.01em;
+      color: var(--text);
+      position: relative;
+      display: inline-block;
+      animation: fadeUp .9s .3s cubic-bezier(.22,1,.36,1) both;
+    }
+    h2.name::after {
+      content: attr(data-text);
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--gold-l), var(--crimson-l), var(--gold));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      opacity: 0;
+      animation: shimmerName 4s 1.5s ease-in-out infinite;
+    }
+    @keyframes shimmerName {
+      0%,100% { opacity: 0; }
+      50%      { opacity: 1; }
+    }
+
+    .subtitle {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: clamp(15px, 4vw, 18px);
+      color: rgba(245,233,224,.55);
+      margin-top: 14px;
+      animation: fadeUp .9s .38s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 36px;
+      margin: 28px 0 24px;
+    }
+    .divider-line { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(212,168,75,.4)); }
+    .divider-line:last-child { background: linear-gradient(270deg, transparent, rgba(212,168,75,.4)); }
+    .divider-diamond {
+      width: 8px; height: 8px;
+      background: var(--gold);
+      transform: rotate(45deg);
+      flex-shrink: 0;
+      box-shadow: 0 0 8px var(--gold);
+    }
+
+    /* ── DETAILS GRID ── */
+    .details {
+      padding: 0 32px 12px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .detail-item {
+      background: var(--surface2);
+      border-radius: 16px;
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      border: 1px solid rgba(255,255,255,.04);
+      transition: border-color .3s, transform .3s;
+      animation: fadeUp .9s cubic-bezier(.22,1,.36,1) both;
+    }
+    .detail-item:hover {
+      border-color: rgba(212,168,75,.25);
+      transform: translateY(-2px);
+    }
+    .detail-item:nth-child(1) { animation-delay: .45s; }
+    .detail-item:nth-child(2) { animation-delay: .52s; }
+    .detail-item:nth-child(3) { animation-delay: .59s; }
+
+    .detail-icon {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .detail-icon.date  { background: rgba(192,18,44,.2); box-shadow: 0 0 20px rgba(192,18,44,.15); }
+    .detail-icon.time  { background: rgba(212,168,75,.15); box-shadow: 0 0 20px rgba(212,168,75,.1); }
+    .detail-icon.place { background: rgba(192,18,44,.2); box-shadow: 0 0 20px rgba(192,18,44,.15); }
+
+    .detail-text { display: flex; flex-direction: column; gap: 2px; }
+    .detail-label {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .detail-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(18px, 5vw, 22px);
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.2;
+    }
+    .detail-value.highlight {
+      background: linear-gradient(90deg, var(--gold-l), var(--gold));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .detail-sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 1px;
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      padding: 24px 32px 36px;
+      text-align: center;
+      animation: fadeUp .9s .7s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    .rsvp-line {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 14px;
+      color: rgba(245,233,224,.35);
+      letter-spacing: .04em;
+    }
+
+    .stamp {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 18px;
+      border: 1px solid rgba(212,168,75,.3);
+      border-radius: 100px;
+      padding: 10px 24px;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      position: relative;
+      overflow: hidden;
+    }
+    .stamp::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(212,168,75,.08), transparent);
+      transform: translateX(-100%);
+      animation: sweepShimmer 3s 2s ease-in-out infinite;
+    }
+    @keyframes sweepShimmer {
+      0%   { transform: translateX(-100%); }
+      60%  { transform: translateX(100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    /* ── KEYFRAMES ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes float {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-6px); }
+    }
+
+    /* ── MOBILE ── */
+    @media (max-width: 480px) {
+      .header { padding: 38px 24px 28px; }
+      .details { padding: 0 20px 8px; }
+      .divider { padding: 0 24px; }
+      .footer  { padding: 20px 24px 30px; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="confetti"></canvas>
+
+<div class="scene">
+  <article class="card">
+    <div class="card-inner">
+
+      <!-- HEADER -->
+      <header class="header">
+        <div class="tag">From Pratyoosh ✦</div>
+        <div class="emoji-row">
+          <span>🎉</span><span>🎂</span><span>🎊</span>
+        </div>
+        <h1 class="invite-title">It's My Birthday!</h1>
+        <h2 class="name" data-text="Come Celebrate">Come Celebrate</h2>
+        <p class="subtitle">Pratyoosh is turning 14 — and you're invited!</p>
+      </header>
+
+      <!-- DIVIDER -->
+      <div class="divider">
+        <div class="divider-line"></div>
+        <div class="divider-diamond"></div>
+        <div class="divider-line"></div>
+      </div>
+
+      <!-- DETAILS -->
+      <section class="details">
+
+        <div class="detail-item">
+          <div class="detail-icon date">🗓️</div>
+          <div class="detail-text">
+            <span class="detail-label">Date</span>
+            <span class="detail-value highlight">6th June</span>
+            <span class="detail-sub">Save the date!</span>
+          </div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-icon time">⏰</div>
+          <div class="detail-text">
+            <span class="detail-label">Time</span>
+            <span class="detail-value">7:15 PM</span>
+            <span class="detail-sub">Don't be late!</span>
+          </div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-icon place">📍</div>
+          <div class="detail-text">
+            <span class="detail-label">Location</span>
+            <span class="detail-value highlight">Pizza Buffet</span>
+            <span class="detail-sub">Mira Road</span>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- FOOTER -->
+      <footer class="footer">
+        <p class="rsvp-line">I can't wait to celebrate with you — see you there! 🎂</p>
+        <div class="stamp">🥂 &nbsp;Let's Party</div>
+      </footer>
+
+    </div><!-- /.card-inner -->
+  </article>
+</div>
+
+<script>
+  /* ── CONFETTI ── */
+  const canvas = document.getElementById('confetti');
+  const ctx    = canvas.getContext('2d');
+  let W, H, particles = [];
+
+  const COLORS = ['#c0122c','#e82244','#d4a84b','#f0cc7a','#f5e9e0','#8a1a2e'];
+  const SHAPES = ['circle','rect','tri'];
+  const COUNT  = 90;
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function rand(a, b) { return a + Math.random() * (b - a); }
+
+  function spawn() {
+    return {
+      x:   rand(0, W),
+      y:   rand(-H * .6, 0),
+      vx:  rand(-0.6, 0.6),
+      vy:  rand(0.4, 1.2),
+      size: rand(4, 9),
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      shape: SHAPES[Math.floor(Math.random() * SHAPES.length)],
+      rot:   rand(0, Math.PI * 2),
+      rotV:  rand(-.03, .03),
+      alpha: rand(0.5, 1),
+      alphaV: rand(-.0015, -.0005),
+    };
+  }
+
+  function draw(p) {
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rot);
+    ctx.globalAlpha = Math.max(0, p.alpha);
+    ctx.fillStyle   = p.color;
+    if (p.shape === 'circle') {
+      ctx.beginPath();
+      ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (p.shape === 'rect') {
+      ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+    } else {
+      ctx.beginPath();
+      ctx.moveTo(0, -p.size / 2);
+      ctx.lineTo(p.size / 2, p.size / 2);
+      ctx.lineTo(-p.size / 2, p.size / 2);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function update(p) {
+    p.x   += p.vx;
+    p.y   += p.vy;
+    p.rot += p.rotV;
+    p.alpha += p.alphaV;
+    // drift side gently
+    p.vx += (Math.random() - .5) * .02;
+  }
+
+  function loop() {
+    ctx.clearRect(0, 0, W, H);
+    particles = particles.filter(p => p.alpha > 0 && p.y < H + 20);
+    // replenish slowly
+    while (particles.length < COUNT) particles.push(spawn());
+    particles.forEach(p => { update(p); draw(p); });
+    requestAnimationFrame(loop);
+  }
+
+  resize();
+  for (let i = 0; i < COUNT; i++) {
+    const p = spawn();
+    p.y = rand(0, H); // pre-scatter on load
+    particles.push(p);
+  }
+  window.addEventListener('resize', resize);
+  loop();
+</script>
+</body>
+</html>
